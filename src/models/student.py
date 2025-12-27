@@ -1,59 +1,83 @@
-"""
-Lightweight student model for deepfake detection
-"""
 import torch
 import torch.nn as nn
+import torchvision.models as models
 
 class StudentModel(nn.Module):
+    """Lightweight student model for deepfake detection"""
+    
     def __init__(self, num_classes=2):
         super(StudentModel, self).__init__()
         
-        # Lightweight backbone - MobileNetV3 small
-        # For now, we'll use a simple CNN structure
-        self.features = nn.Sequential(
-            # First conv block
-            nn.Conv2d(3, 16, 3, stride=2, padding=1),
-            nn.BatchNorm2d(16),
-            nn.ReLU(inplace=True),
-            
-            # Depthwise separable conv blocks
-            nn.Conv2d(16, 16, 3, stride=1, padding=1, groups=16),
-            nn.Conv2d(16, 32, 1),
-            nn.BatchNorm2d(32),
-            nn.ReLU(inplace=True),
-            
-            nn.Conv2d(32, 32, 3, stride=2, padding=1, groups=32),
-            nn.Conv2d(32, 64, 1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            
-            nn.Conv2d(64, 64, 3, stride=2, padding=1, groups=64),
-            nn.Conv2d(64, 128, 1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
-            
-            # Global average pooling
-            nn.AdaptiveAvgPool2d(1)
+        # Use MobileNetV3 as backbone for efficiency
+        self.backbone = models.mobilenet_v3_small(pretrained=True)
+        
+        # Replace classifier with our own
+        in_features = self.backbone.classifier[0].in_features
+        self.backbone.classifier = nn.Sequential(
+            nn.Linear(in_features, 128),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(128, num_classes)
         )
         
-        # Classifier head
-        self.classifier = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(128, 64),
-            nn.ReLU(inplace=True),
-            nn.Dropout(0.2),
-            nn.Linear(64, num_classes)
-        )
-    
     def forward(self, x):
-        x = self.features(x)
-        x = self.classifier(x)
-        return x
+        return self.backbone(x)
+
+class MultiModalStudent(nn.Module):
+    """Multimodal student for video + audio"""
+    
+    def __init__(self, num_classes=2):
+        super(MultiModalStudent, self).__init__()
+        
+        # Video branch
+        self.video_backbone = models.mobilenet_v3_small(pretrained=True)
+        video_features = self.video_backbone.classifier[0].in_features
+        self.video_backbone.classifier = nn.Identity()
+        
+        # Audio branch (simple CNN for spectrograms)
+        self.audio_branch = nn.Sequential(
+            nn.Conv2d(1, 32, 3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+            nn.Conv2d(32, 64, 3, padding=1),
+            nn.ReLU(),
+            nn.AdaptiveAvgPool2d((1, 1)),
+            nn.Flatten()
+        )
+        
+        # Fusion layer
+        self.fusion = nn.Sequential(
+            nn.Linear(video_features + 64, 128),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(128, num_classes)
+        )
+        
+    def forward(self, video, audio=None):
+        video_feat = self.video_backbone(video)
+        
+        if audio is not None:
+            audio_feat = self.audio_branch(audio)
+            combined = torch.cat([video_feat, audio_feat], dim=1)
+            return self.fusion(combined)
+        else:
+            # Video only mode
+            return self.fusion(torch.cat([video_feat, torch.zeros(video_feat.size(0), 64).to(video_feat.device)], dim=1))
 
 if __name__ == "__main__":
-    # Test model
+    # Test the models
     model = StudentModel()
-    test_input = torch.randn(1, 3, 224, 224)
-    output = model(test_input)
-    print(f"Model output shape: {output.shape}")
-    print(f"Model parameters: {sum(p.numel() for p in model.parameters()):,}")
+    print(f"Student model parameters: {sum(p.numel() for p in model.parameters()):,}")
+    
+    multimodal = MultiModalStudent()
+    print(f"Multimodal model parameters: {sum(p.numel() for p in multimodal.parameters()):,}")
+    
+    # Test forward pass
+    dummy_video = torch.randn(1, 3, 224, 224)
+    dummy_audio = torch.randn(1, 1, 128, 128)
+    
+    with torch.no_grad():
+        output1 = model(dummy_video)
+        output2 = multimodal(dummy_video, dummy_audio)
+        print(f"Video-only output shape: {output1.shape}")
+        print(f"Multimodal output shape: {output2.shape}")

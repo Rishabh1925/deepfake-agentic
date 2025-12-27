@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  eraksha-site:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8080:80"
+    container_name: eraksha-site
+    restart: unless-stopped
+    volumes:
+      - ./export:/usr/share/nginx/html/models:ro
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  default:
+    name: eraksha-network
