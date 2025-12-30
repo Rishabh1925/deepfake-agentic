@@ -9,13 +9,13 @@ from pathlib import Path
 from tqdm import tqdm
 
 # Hugging Face repository for model weights
-# You'll create this: https://huggingface.co/your-username/interceptor-models
-HF_REPO = "your-username/interceptor-models"  # Change this to your HF repo
+# Repository: https://huggingface.co/Pran-ay-22077/interceptor-models
+HF_REPO = "Pran-ay-22077/interceptor-models"
 HF_BASE_URL = f"https://huggingface.co/{HF_REPO}/resolve/main"
 
 # Model files to download
 MODEL_FILES = {
-    "bg_model_student.pt": "BG-Model (Baseline Generalist)",
+    "baseline_student.pt": "BG-Model (Baseline Generalist)",
     "av_model_student.pt": "AV-Model (Audio-Visual)",
     "cm_model_student.pt": "CM-Model (Compression)",
     "rr_model_student.pt": "RR-Model (Re-recording)",

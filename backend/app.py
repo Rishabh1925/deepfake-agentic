@@ -47,7 +47,7 @@ MODELS_DIR = Path(__file__).parent.parent / "models"
 
 # Model registry
 MODELS = {
-    "bg": {"name": "BG-Model", "file": "bg_model_student.pt", "accuracy": 0.8625},
+    "bg": {"name": "BG-Model", "file": "baseline_student.pt", "accuracy": 0.8625},
     "av": {"name": "AV-Model", "file": "av_model_student.pt", "accuracy": 0.93},
     "cm": {"name": "CM-Model", "file": "cm_model_student.pt", "accuracy": 0.8083},
     "rr": {"name": "RR-Model", "file": "rr_model_student.pt", "accuracy": 0.85},
