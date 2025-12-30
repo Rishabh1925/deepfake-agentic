@@ -73,11 +73,9 @@
     "@vitejs/plugin-react": "4.7.0",
     "tailwindcss": "4.1.12",
     "typescript": "^5.7.2",
-    "vite": "6.3.5"
+    "vite": "^5.4.10"
   },
-  "pnpm": {
-    "overrides": {
-      "vite": "6.3.5"
-    }
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
