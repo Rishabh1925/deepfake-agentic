@@ -52,6 +52,15 @@ baseline_student.pkl
 *.onnx
 *.onnx.data
 
+# Large model files (>100MB - use Git LFS or download separately)
+*_model_student.pt
+av_model_student.pt
+cm_model_student.pt
+rr_model_student.pt
+ll_model_student.pt
+tm_model_student.pt
+ll_model_student*.pt
+
 # Jupyter Notebook
 .ipynb_checkpoints
 
