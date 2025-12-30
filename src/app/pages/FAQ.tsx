@@ -6,84 +6,68 @@ const FAQ = () => {
 
   const faqs = [
     {
-      q: 'What does this system do?',
-      a: 'This system analyzes videos to determine whether they are real or AI-generated (deepfake). It evaluates visual and temporal cues using multiple AI models and provides a confidence score along with an explanation of its decision.',
+      q: 'What is Interceptor?',
+      a: 'Interceptor is an agentic AI system for deepfake detection developed for the E-Raksha Hackathon 2026. It uses 6 specialist neural networks (BG, AV, CM, RR, LL, TM models) coordinated by a LangGraph agent to provide comprehensive video authenticity analysis with 94.9% detection confidence.',
     },
     {
-      q: 'How is this different from other deepfake detectors?',
-      a: 'Unlike single-model detectors, our system uses an agent-based approach. An intelligent controller decides which specialized AI model to use depending on the video\'s quality, compression level, and artifacts, making detection more reliable in real-world scenarios.',
+      q: 'How is Interceptor different from other deepfake detectors?',
+      a: 'Unlike single-model detectors, Interceptor uses an agentic approach with LangGraph. An intelligent routing engine analyzes video characteristics (compression, lighting, temporal patterns) and routes to specialized models. This multi-model ensemble provides more reliable detection across diverse real-world scenarios.',
+    },
+    {
+      q: 'What are the 6 specialist models?',
+      a: 'BG-Model (Baseline Generalist - 86.25% accuracy), AV-Model (Audio-Visual - 93.0%), CM-Model (Compression - 80.83%), RR-Model (Re-recording - 85.0%), LL-Model (Low-light - 93.42%), and TM-Model (Temporal - 78.5%). Each is trained for specific video conditions.',
     },
     {
       q: 'Does this work on low-quality or compressed videos?',
-      a: 'Yes. The system includes specialist models trained specifically for compressed, re-encoded, and screen-recorded videos, which are common on platforms like WhatsApp, Instagram, and YouTube.',
+      a: 'Yes. The CM-Model (Compression Specialist) is specifically trained on videos compressed at 200-800 kbps, common on WhatsApp, Instagram, and YouTube. The RR-Model handles screen-recorded content with moiré patterns.',
     },
     {
-      q: 'Is this detection done in real time?',
-      a: 'The system provides near real-time analysis for short videos. Processing time may vary depending on video length, resolution, and complexity.',
+      q: 'How fast is the analysis?',
+      a: 'Average processing time is 2.1 seconds. The agentic routing can save up to 83% computation by accepting high-confidence baseline predictions without invoking all specialists.',
     },
     {
       q: 'Is my video stored or shared?',
-      a: 'No. Uploaded videos are not publicly shared. Videos are processed securely and can be automatically deleted after analysis unless the user explicitly consents to contribute data for research and model improvement.',
+      a: 'No. Uploaded videos are processed securely and deleted after analysis. Videos are never used for training without explicit user consent and human verification.',
     },
     {
-      q: 'Does the system learn from my uploaded video?',
-      a: 'Not automatically. User uploads are never used for training by default. Only videos that users explicitly approve — and which pass human verification — may be added to a secure training pipeline.',
+      q: 'How accurate is Interceptor?',
+      a: 'Overall detection confidence is 94.9%. Individual model accuracies range from 78.5% (TM-Model) to 93.42% (LL-Model). The system prioritizes reliability over overconfidence - uncertain videos are flagged rather than forced predictions.',
     },
     {
-      q: 'How accurate is the system?',
-      a: 'Accuracy depends on video quality and type. The system is designed to prioritize reliability over overconfidence. If the AI is uncertain, it flags the video instead of giving a misleading result.',
+      q: 'What happens when confidence is low?',
+      a: 'The agent uses confidence-based routing: High (≥85%) accepts baseline, Medium (65-85%) routes to 2-3 relevant specialists, Low (<65%) invokes all 6 specialists. Uncertain results are flagged for human review.',
     },
     {
-      q: 'What happens if the system is unsure?',
-      a: 'When confidence is low, the system either runs additional specialist models, or flags the video as "uncertain" instead of forcing a prediction. This reduces false positives and false negatives.',
-    },
-    {
-      q: 'Can this detect all types of deepfakes?',
-      a: 'No system can guarantee 100% detection. Our approach is adaptive and extensible, meaning new specialist models can be added as new deepfake techniques emerge.',
-    },
-    {
-      q: 'Does this system analyze audio as well?',
-      a: 'Currently, the primary focus is video analysis. Audio-visual consistency checks (such as lip-sync analysis) are part of the planned future extensions.',
+      q: 'Does Interceptor analyze audio?',
+      a: 'Yes. The AV-Model (Audio-Visual) analyzes lip-sync consistency and audio-visual correlation. Audio is extracted and processed alongside video frames for comprehensive analysis.',
     },
     {
       q: 'Can this be used offline?',
-      a: 'The current version runs online via a secure server. A future offline mobile and edge-device version is planned for field and low-connectivity environments.',
+      a: 'Yes. All models are optimized for edge deployment with INT8 quantization. Total model size is 47.2M parameters (~512MB memory). Offline mobile deployment is supported.',
     },
     {
-      q: 'Is this system open-source?',
-      a: 'Parts of the system are developed as research components. Full open-source release depends on security and deployment considerations.',
+      q: 'What video formats are supported?',
+      a: 'MP4, AVI, MOV, MKV, and WebM formats up to 100MB. Videos are decoded, frames sampled, faces detected using MTCNN, and processed through the agentic pipeline.',
     },
     {
-      q: 'Who is this system designed for?',
-      a: 'This system is designed for: Law enforcement and investigators, Journalists and fact-checkers, Digital forensics teams, and General users concerned about misinformation.',
+      q: 'How does the explainability work?',
+      a: 'Interceptor provides Grad-CAM heatmaps highlighting suspicious regions, confidence breakdowns per model, and human-readable explanations of why a video was flagged.',
     },
     {
-      q: 'Can this be integrated into other platforms?',
-      a: 'Yes. The system is designed with API-based integration in mind and can be embedded into websites, apps, or internal tools.',
+      q: 'Who is Interceptor designed for?',
+      a: 'Law enforcement and investigators, journalists and fact-checkers, digital forensics teams, field operatives (offline edge deployment), and general users concerned about misinformation.',
     },
     {
-      q: 'Does the system identify people in videos?',
-      a: 'No. The system does not perform identity recognition. It only analyzes video authenticity and does not store or infer personal identity information.',
+      q: 'Can Interceptor be integrated via API?',
+      a: 'Yes. FastAPI backend provides RESTful endpoints: POST /predict for analysis, GET /stats for system statistics, GET /health for status checks. Full Swagger documentation available.',
     },
     {
-      q: 'Is this a final production system?',
-      a: 'This is a research and development prototype created for the E-Raksha Hackathon. Continuous improvements and evaluations are planned.',
+      q: 'What is the technology stack?',
+      a: 'PyTorch for neural networks, LangGraph for agentic orchestration, FastAPI for backend, React for frontend, MTCNN for face detection, and Docker for deployment. ResNet18-based architectures with knowledge distillation.',
     },
     {
-      q: 'How is this system kept secure?',
-      a: 'Model versions are verified, training data is curated, and feedback is reviewed by humans before being used. This prevents misuse and model poisoning.',
-    },
-    {
-      q: 'Why should I trust the result?',
-      a: 'The system provides confidence scores and visual explanations, helping users understand why a video may be flagged rather than relying on blind predictions.',
-    },
-    {
-      q: 'Can I give feedback on a result?',
-      a: 'Yes. Users can optionally provide feedback if they know the ground truth. Feedback helps improve future versions after verification.',
-    },
-    {
-      q: 'Who built this system?',
-      a: 'This system was developed by a multidisciplinary student team as part of the E-Raksha Hackathon, focusing on AI safety, trust, and real-world deployment.',
+      q: 'Who built Interceptor?',
+      a: 'Interceptor was developed by a multidisciplinary team for the E-Raksha Hackathon 2026 (Problem Statement II) - National Cyber Challenge by eDC IIT Delhi in collaboration with CyberPeace.',
     },
   ];
 

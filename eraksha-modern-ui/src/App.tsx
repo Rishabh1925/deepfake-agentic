@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
+import { ArchitectureProvider } from './context/ArchitectureContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import AnalysisWorkbench from './pages/AnalysisWorkbench';
@@ -12,7 +13,8 @@ import FAQ from './pages/FAQ';
 export default function App() {
   return (
     <ThemeProvider>
-      <Router>
+      <ArchitectureProvider>
+        <Router>
         <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-100 to-cyan-100 dark:from-gray-950 dark:via-blue-950 dark:to-purple-950 transition-colors relative overflow-hidden">
           {/* Animated gradient background */}
           <div className="fixed inset-0 opacity-30 dark:opacity-20">
@@ -33,7 +35,8 @@ export default function App() {
             </Routes>
           </div>
         </div>
-      </Router>
+        </Router>
+      </ArchitectureProvider>
     </ThemeProvider>
   );
 }

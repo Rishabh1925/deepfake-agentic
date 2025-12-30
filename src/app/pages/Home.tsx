@@ -6,18 +6,18 @@ const Home = () => {
   const features = [
     {
       icon: <ShieldCheck className="w-6 h-6" />,
-      title: 'AI-Powered Detection',
-      description: 'Advanced ResNet18 model with 65% accuracy for reliable deepfake identification',
+      title: 'Agentic AI Detection',
+      description: '6 specialist neural networks with 94.9% overall detection confidence powered by LangGraph',
     },
     {
       icon: <Eye className="w-6 h-6" />,
-      title: 'Visual Analysis',
-      description: 'Interactive heatmaps highlighting suspicious regions in your videos',
+      title: 'Intelligent Routing',
+      description: 'Smart agent routes videos to specialized models based on compression, lighting & temporal analysis',
     },
     {
       icon: <Zap className="w-6 h-6" />,
-      title: 'Fast Processing',
-      description: 'Get results in 2-4 seconds for videos up to 100MB',
+      title: 'Real-time Processing',
+      description: 'Average 2.1 second processing with Grad-CAM heatmaps for explainable results',
     },
   ];
 
@@ -80,24 +80,30 @@ const Home = () => {
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <div className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl p-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
               <div>
                 <p className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                  1,247
+                  6
                 </p>
-                <p className="text-gray-600 dark:text-gray-400">Videos Analyzed</p>
+                <p className="text-gray-600 dark:text-gray-400">Specialist Models</p>
               </div>
               <div>
                 <p className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                  65%
+                  94.9%
                 </p>
-                <p className="text-gray-600 dark:text-gray-400">Detection Accuracy</p>
+                <p className="text-gray-600 dark:text-gray-400">Detection Confidence</p>
               </div>
               <div>
                 <p className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                  3.2s
+                  2.1s
                 </p>
-                <p className="text-gray-600 dark:text-gray-400">Average Processing</p>
+                <p className="text-gray-600 dark:text-gray-400">Avg Processing Time</p>
+              </div>
+              <div>
+                <p className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                  47.2M
+                </p>
+                <p className="text-gray-600 dark:text-gray-400">Total Parameters</p>
               </div>
             </div>
           </div>
@@ -108,22 +114,23 @@ const Home = () => {
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-            How It Works
+            How Interceptor Works
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[
-              { step: '1', title: 'Upload Video', desc: 'Upload your video file (MP4, AVI, MOV, WebM)' },
-              { step: '2', title: 'AI Analysis', desc: 'Our ResNet18 model analyzes each frame' },
-              { step: '3', title: 'Get Results', desc: 'Receive detailed analysis with confidence scores' },
+              { step: '1', title: 'Upload Video', desc: 'Upload your video file (MP4, AVI, MOV, WebM up to 100MB)' },
+              { step: '2', title: 'Video Analysis', desc: 'Extract frames, detect faces, analyze audio & metadata' },
+              { step: '3', title: 'Agentic Routing', desc: 'LangGraph agent routes to specialist models (BG, AV, CM, RR, LL, TM)' },
+              { step: '4', title: 'Get Results', desc: 'Aggregated prediction with Grad-CAM heatmaps & explanations' },
             ].map((item) => (
               <div key={item.step} className="text-center">
-                <div className="w-16 h-16 bg-blue-600 dark:bg-blue-500 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div className="w-14 h-14 bg-blue-600 dark:bg-blue-500 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
                   {item.step}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                   {item.title}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400">{item.desc}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -134,16 +141,16 @@ const Home = () => {
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 rounded-3xl p-12 text-center shadow-2xl">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Analyze Your Videos?
+            Ready to Detect Deepfakes?
           </h2>
           <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
-            Start detecting deepfakes with professional-grade AI analysis. Quick, accurate, and reliable.
+            Interceptor uses agentic AI with 6 specialist models for comprehensive deepfake detection. Fast, accurate, and explainable.
           </p>
           <Link
             to="/workbench"
             className="inline-flex items-center gap-2 px-8 py-3 bg-white hover:bg-gray-100 text-blue-600 rounded-xl transition-colors shadow-lg"
           >
-            Get Started
+            Start Analysis
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>

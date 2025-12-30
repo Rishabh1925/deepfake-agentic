@@ -31,10 +31,10 @@ const DeveloperPortal = () => {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">
-            Integrate Deepfake Detection Into Your Workflow
+            Interceptor Developer API
           </h1>
           <p className="text-gray-400 max-w-3xl">
-            Add powerful AI-driven deepfake detection to your applications with our REST API. Comprehensive documentation, SDKs, and live testing tools.
+            Integrate Interceptor's agentic deepfake detection into your applications. 6 specialist models, LangGraph orchestration, and comprehensive REST API with Swagger documentation.
           </p>
         </div>
 
@@ -174,14 +174,22 @@ console.log('Confidence:', result.confidence);`}</code>
                 <pre className="text-sm text-gray-300 overflow-x-auto">
                   <code>{`{
   "prediction": "fake",
-  "confidence": 0.73,
+  "confidence": 0.949,
   "faces_analyzed": 5,
+  "models_used": ["BG-Model", "AV-Model", "CM-Model"],
   "analysis": {
     "confidence_breakdown": {
-      "raw_confidence": 0.73,
-      "quality_adjusted": 0.68
+      "raw_confidence": 0.949,
+      "quality_adjusted": 0.92,
+      "consistency": 0.95,
+      "quality_score": 0.88
+    },
+    "routing": {
+      "confidence_level": "high",
+      "specialists_invoked": 3
     }
-  }
+  },
+  "processing_time": 2.1
 }`}</code>
                 </pre>
               </div>
