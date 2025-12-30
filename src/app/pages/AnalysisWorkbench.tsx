@@ -96,19 +96,26 @@ const AnalysisWorkbench = () => {
       }, 100);
 
       // Call real backend API
+      console.log('Making API call to:', `${API_URL}/predict`);
       const response = await fetch(`${API_URL}/predict`, {
         method: 'POST',
         body: formData,
       });
 
+      console.log('API Response status:', response.status);
+      console.log('API Response headers:', response.headers);
+
       clearInterval(progressInterval);
       setProgress(100);
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text();
+        console.error('API Error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const result = await response.json();
+      console.log('API Result:', result);
       
       setAnalysisResult(result);
       setIsAnalyzing(false);
@@ -123,37 +130,12 @@ const AnalysisWorkbench = () => {
 
     } catch (error) {
       console.error('Analysis failed:', error);
-      
-      // Fallback to mock data if backend fails
-      setProgress(100);
-      setAnalysisResult({
-        prediction: 'fake',
-        confidence: 0.73,
-        faces_analyzed: 5,
-        analysis: {
-          confidence_breakdown: {
-            raw_confidence: 0.73,
-            quality_adjusted: 0.68,
-            consistency: 0.92,
-            quality_score: 0.85,
-          },
-          heatmaps_generated: 2,
-          suspicious_frames: 3,
-        },
-        filename: selectedFile?.name,
-        file_size: selectedFile?.size,
-        error: 'Backend connection failed - showing mock data'
-      });
-
+      clearInterval(progressInterval);
+      setProgress(0);
       setIsAnalyzing(false);
-
-      // Scroll to results section
-      setTimeout(() => {
-        resultsSectionRef.current?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
-        });
-      }, 1000);
+      
+      // Show error message instead of fake data
+      alert(`Analysis failed: ${error.message}. Please try again or check your internet connection.`);
     }
   };
 
