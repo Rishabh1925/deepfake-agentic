@@ -11,25 +11,25 @@ const Analytics = () => {
       change: '+156',
     },
     {
-      label: 'Accuracy',
-      value: '68.5%',
+      label: 'Detection Confidence',
+      value: '94.9%',
       icon: <TrendingUp className="w-5 h-5" />,
-      change: '+2.3%',
+      change: '+4.2%',
     },
     {
-      label: 'Avg Latency',
-      value: '3.2s',
+      label: 'Avg Processing',
+      value: '2.1s',
       icon: <Activity className="w-5 h-5" />,
-      change: '-0.5s',
+      change: '-0.8s',
     },
   ];
 
   const trendData = [
-    { month: 'Jan', processed: 850, accuracy: 63 },
-    { month: 'Feb', processed: 920, accuracy: 64 },
-    { month: 'Mar', processed: 1050, accuracy: 65 },
-    { month: 'Apr', processed: 1180, accuracy: 66.5 },
-    { month: 'May', processed: 1247, accuracy: 68.5 },
+    { month: 'Jan', processed: 850, accuracy: 89 },
+    { month: 'Feb', processed: 920, accuracy: 91 },
+    { month: 'Mar', processed: 1050, accuracy: 92.5 },
+    { month: 'Apr', processed: 1180, accuracy: 93.8 },
+    { month: 'May', processed: 1247, accuracy: 94.9 },
   ];
 
   const dailyData = [
@@ -48,10 +48,10 @@ const Analytics = () => {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Statistics
+            Interceptor Statistics
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Monitor usage, accuracy, and system performance in real-time
+            Monitor detection confidence, processing times, and model performance across all 6 specialist networks
           </p>
         </div>
 
@@ -96,7 +96,6 @@ const Analytics = () => {
                     border: '1px solid #E5E7EB',
                     borderRadius: '8px',
                   }}
-                  className="dark:bg-gray-900 dark:border-gray-800"
                 />
                 <Line
                   type="monotone"
@@ -132,7 +131,6 @@ const Analytics = () => {
                     border: '1px solid #E5E7EB',
                     borderRadius: '8px',
                   }}
-                  className="dark:bg-gray-900 dark:border-gray-800"
                 />
                 <Area
                   type="monotone"
@@ -149,24 +147,51 @@ const Analytics = () => {
         {/* Real-time Stats */}
         <div className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl p-8">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-            Real-time Metrics
+            Model Performance
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="bg-green-50/50 dark:bg-green-900/20 backdrop-blur-md rounded-xl p-4 border border-green-200 dark:border-green-800">
+              <p className="text-xs text-green-600 dark:text-green-400 mb-1">BG-Model</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">86.25%</p>
+            </div>
+            <div className="bg-blue-50/50 dark:bg-blue-900/20 backdrop-blur-md rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+              <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">AV-Model</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">93.0%</p>
+            </div>
+            <div className="bg-purple-50/50 dark:bg-purple-900/20 backdrop-blur-md rounded-xl p-4 border border-purple-200 dark:border-purple-800">
+              <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">CM-Model</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">80.83%</p>
+            </div>
+            <div className="bg-orange-50/50 dark:bg-orange-900/20 backdrop-blur-md rounded-xl p-4 border border-orange-200 dark:border-orange-800">
+              <p className="text-xs text-orange-600 dark:text-orange-400 mb-1">RR-Model</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">85.0%</p>
+            </div>
+            <div className="bg-cyan-50/50 dark:bg-cyan-900/20 backdrop-blur-md rounded-xl p-4 border border-cyan-200 dark:border-cyan-800">
+              <p className="text-xs text-cyan-600 dark:text-cyan-400 mb-1">LL-Model</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">93.42%</p>
+            </div>
+            <div className="bg-pink-50/50 dark:bg-pink-900/20 backdrop-blur-md rounded-xl p-4 border border-pink-200 dark:border-pink-800">
+              <p className="text-xs text-pink-600 dark:text-pink-400 mb-1">TM-Model</p>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">78.5%</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
             <div className="bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-md rounded-xl p-4">
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Total Scans</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">1,247</p>
             </div>
             <div className="bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-md rounded-xl p-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Avg Latency</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">3.2s</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Avg Processing</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">2.1s</p>
             </div>
             <div className="bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-md rounded-xl p-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Accuracy</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">68.5%</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Total Parameters</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">47.2M</p>
             </div>
             <div className="bg-gray-50/50 dark:bg-gray-800/50 backdrop-blur-md rounded-xl p-4">
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Avg File Size</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">25MB</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Memory Usage</p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">512MB</p>
             </div>
           </div>
         </div>

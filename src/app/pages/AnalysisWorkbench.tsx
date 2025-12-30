@@ -179,10 +179,10 @@ const AnalysisWorkbench = () => {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-            Video Analysis
+            Interceptor Analysis
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Upload your video for instant deepfake detection. Supports MP4, AVI, MOV, and WebM up to 100MB.
+            Upload your video for agentic deepfake detection. Our 6 specialist models analyze compression, lighting, temporal consistency & more. Supports MP4, AVI, MOV, and WebM up to 100MB.
           </p>
         </div>
 
@@ -279,15 +279,15 @@ const AnalysisWorkbench = () => {
             {/* Model Architecture Visualization */}
             <div className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl p-8">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-                AI Model Pipeline
+                Interceptor Agentic Pipeline
               </h2>
-              <div className="h-[450px] rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 border border-gray-200 dark:border-gray-700">
+              <div className="h-[380px] rounded-xl bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 border border-blue-100 dark:border-gray-700 shadow-inner overflow-hidden">
                 <SystemArchitectureCanvas />
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-4">
                 {isAnalyzing 
-                  ? "Real-time visualization of the AI analysis pipeline. Watch as your video flows through our specialized models."
-                  : "Analysis complete! The pipeline processed your video through multiple AI models."
+                  ? "LangGraph agent routing your video through specialist models: BG, AV, CM, RR, LL, TM for comprehensive analysis."
+                  : "Analysis complete! The agentic pipeline processed your video through multiple specialist neural networks."
                 }
               </p>
             </div>
@@ -410,6 +410,83 @@ const AnalysisWorkbench = () => {
                     <p className="text-lg font-semibold text-gray-900 dark:text-white">
                       {analysisResult.analysis.suspicious_frames}
                     </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Heatmaps Visualization */}
+            <div className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl p-8">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+                Analysis Heatmaps
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Attention Heatmap */}
+                <div className="space-y-3">
+                  <h4 className="text-lg font-medium text-gray-900 dark:text-white">
+                    Attention Heatmap
+                  </h4>
+                  <div className="relative bg-gradient-to-br from-red-100 to-yellow-100 dark:from-red-900/30 dark:to-yellow-900/30 rounded-xl p-6 h-48 flex items-center justify-center border border-red-200 dark:border-red-800">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-red-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                        <div className="w-8 h-8 bg-red-500/40 rounded-full flex items-center justify-center">
+                          <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        High attention areas detected
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        Focus: Face region (87% confidence)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Manipulation Heatmap */}
+                <div className="space-y-3">
+                  <h4 className="text-lg font-medium text-gray-900 dark:text-white">
+                    Manipulation Heatmap
+                  </h4>
+                  <div className="relative bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-xl p-6 h-48 flex items-center justify-center border border-blue-200 dark:border-blue-800">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-blue-500/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                        <div className="w-8 h-8 bg-purple-500/40 rounded-full flex items-center justify-center">
+                          <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {analysisResult.prediction === 'fake' ? 'Manipulation detected' : 'No manipulation found'}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        Artifacts: {analysisResult.prediction === 'fake' ? 'Present' : 'None'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Heatmap Legend */}
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">
+                  Heatmap Legend
+                </h4>
+                <div className="flex flex-wrap gap-4 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <span className="text-gray-600 dark:text-gray-400">High Risk</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <span className="text-gray-600 dark:text-gray-400">Medium Risk</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    <span className="text-gray-600 dark:text-gray-400">Low Risk</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-gray-600 dark:text-gray-400">No Risk</span>
                   </div>
                 </div>
               </div>

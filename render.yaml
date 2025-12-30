@@ -1,0 +1,13 @@
+# Render.com deployment configuration
+services:
+  - type: web
+    name: interceptor-api
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && python app.py
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 8000
