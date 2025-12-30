@@ -21,6 +21,11 @@ wheels/
 *.egg
 MANIFEST
 
+# Node.js
+node_modules/
+.npm
+.pnpm-store/
+
 # Virtual Environment
 .venv/
 venv/
