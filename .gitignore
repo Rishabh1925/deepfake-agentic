@@ -35,7 +35,6 @@ env/
 # Environment Variables and Secrets
 .env
 .env.local
-.env.production
 .env.development
 *.key
 *.pem
