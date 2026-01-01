@@ -1,13 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { getAnalyticsStats } from '../../lib/supabase';
 
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [stats, setStats] = useState({
+    totalAnalyses: 0,
+    fakeDetected: 0,
+    realDetected: 0,
+    recentAnalyses: 0,
+    averageConfidence: 0
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await getAnalyticsStats();
+        setStats(data);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const faqs = [
     {
       q: 'What is Interceptor?',
-      a: 'Interceptor is an agentic AI system for deepfake detection developed for the E-Raksha Hackathon 2026. It uses 6 specialist neural networks (BG, AV, CM, RR, LL, TM models) coordinated by a LangGraph agent to provide comprehensive video authenticity analysis with 94.9% detection confidence.',
+      a: `Interceptor is an agentic AI system for deepfake detection developed for the E-Raksha Hackathon 2026. It uses 6 specialist neural networks (BG, AV, CM, RR, LL, TM models) coordinated by a LangGraph agent to provide comprehensive video authenticity analysis with ${(stats.averageConfidence * 100).toFixed(1)}% detection confidence.`,
     },
     {
       q: 'How is Interceptor different from other deepfake detectors?',
@@ -31,7 +52,7 @@ const FAQ = () => {
     },
     {
       q: 'How accurate is Interceptor?',
-      a: 'Overall detection confidence is 94.9%. Individual model accuracies range from 78.5% (TM-Model) to 93.42% (LL-Model). The system prioritizes reliability over overconfidence - uncertain videos are flagged rather than forced predictions.',
+      a: `Overall detection confidence is ${(stats.averageConfidence * 100).toFixed(1)}%. Individual model accuracies range from 78.5% (TM-Model) to 93.42% (LL-Model). The system prioritizes reliability over overconfidence - uncertain videos are flagged rather than forced predictions.`,
     },
     {
       q: 'What happens when confidence is low?',

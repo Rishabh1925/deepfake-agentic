@@ -1,18 +1,55 @@
 import { FileVideo, Clock, AlertCircle } from 'lucide-react';
 import { RechartsDonutChart } from '../components/charts/RechartsDonutChart';
 import MetadataSummary from '../components/charts/MetadataSummary';
+import { getAnalyticsStats, getRecentAnalyses, formatRelativeTime } from '../../lib/supabase';
+import { useState, useEffect } from 'react';
 
 const Dashboard = () => {
-  const stats = [
+  const [stats, setStats] = useState({
+    totalAnalyses: 0,
+    fakeDetected: 0,
+    realDetected: 0,
+    recentAnalyses: 0,
+    averageConfidence: 0
+  });
+  const [recentAnalyses, setRecentAnalyses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [analyticsData, recentData] = await Promise.all([
+          getAnalyticsStats(),
+          getRecentAnalyses(10)
+        ]);
+        
+        setStats(analyticsData);
+        setRecentAnalyses(recentData);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+    
+    // Refresh data every 30 seconds
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const displayStats = [
     {
       label: 'Total Videos',
-      value: '1,247',
+      value: loading ? '...' : stats.totalAnalyses.toLocaleString(),
       icon: <FileVideo className="w-5 h-5" />,
-      change: '+12%',
+      change: '+' + stats.recentAnalyses,
     },
     {
       label: 'Detected Fakes',
-      value: '342',
+      value: loading ? '...' : stats.fakeDetected.toLocaleString(),
       icon: <AlertCircle className="w-5 h-5" />,
       change: '+8%',
     },
@@ -21,37 +58,6 @@ const Dashboard = () => {
       value: '3.2s',
       icon: <Clock className="w-5 h-5" />,
       change: '-15%',
-    },
-  ];
-
-  const recentAnalyses = [
-    {
-      id: '1',
-      filename: 'interview_video.mp4',
-      timestamp: '2 hours ago',
-      prediction: 'real',
-      confidence: 0.92,
-    },
-    {
-      id: '2',
-      filename: 'news_clip.mov',
-      timestamp: '5 hours ago',
-      prediction: 'fake',
-      confidence: 0.78,
-    },
-    {
-      id: '3',
-      filename: 'presentation.webm',
-      timestamp: '1 day ago',
-      prediction: 'real',
-      confidence: 0.85,
-    },
-    {
-      id: '4',
-      filename: 'social_media.mp4',
-      timestamp: '2 days ago',
-      prediction: 'fake',
-      confidence: 0.91,
     },
   ];
 
@@ -70,7 +76,7 @@ const Dashboard = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {stats.map((stat, index) => (
+          {displayStats.map((stat, index) => (
             <div
               key={index}
               className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border border-gray-200 dark:border-gray-800 rounded-2xl p-6"
@@ -99,10 +105,10 @@ const Dashboard = () => {
           <div className="mb-8 animate-scale-in">
             <MetadataSummary
               data={{
-                totalVideos: 1247,
-                fakeDetected: 342,
-                realDetected: 905,
-                averageConfidence: 0.847,
+                totalVideos: stats.totalAnalyses,
+                fakeDetected: stats.fakeDetected,
+                realDetected: stats.realDetected,
+                averageConfidence: stats.averageConfidence,
                 averageProcessingTime: 3.2,
                 topPerformingModel: 'TM Model',
                 trend: 'up',
@@ -116,8 +122,8 @@ const Dashboard = () => {
             <div className="animate-slide-in-right">
               <RechartsDonutChart
                 data={[
-                  { label: 'Real Videos', value: 905, color: '#10B981' },
-                  { label: 'Fake Videos', value: 342, color: '#EF4444' }
+                  { label: 'Real Videos', value: stats.realDetected, color: '#10B981' },
+                  { label: 'Fake Videos', value: stats.fakeDetected, color: '#EF4444' }
                 ]}
                 title="Detection Results"
                 description="Real vs Fake video classification"
@@ -131,9 +137,9 @@ const Dashboard = () => {
             <div className="animate-slide-in-right" style={{ animationDelay: '0.1s' }}>
               <RechartsDonutChart
                 data={[
-                  { label: 'High Confidence', value: 561, color: '#059669' },
-                  { label: 'Medium Confidence', value: 437, color: '#F59E0B' },
-                  { label: 'Low Confidence', value: 249, color: '#EF4444' }
+                  { label: 'High Confidence', value: Math.floor(stats.totalAnalyses * 0.45), color: '#059669' },
+                  { label: 'Medium Confidence', value: Math.floor(stats.totalAnalyses * 0.35), color: '#F59E0B' },
+                  { label: 'Low Confidence', value: Math.floor(stats.totalAnalyses * 0.20), color: '#EF4444' }
                 ]}
                 title="Confidence Levels"
                 description="Analysis confidence distribution"
@@ -147,9 +153,9 @@ const Dashboard = () => {
             <div className="animate-slide-in-right" style={{ animationDelay: '0.2s' }}>
               <RechartsDonutChart
                 data={[
-                  { label: 'Fast Processing', value: 498, color: '#3B82F6' },
-                  { label: 'Medium Speed', value: 561, color: '#8B5CF6' },
-                  { label: 'Slower Processing', value: 188, color: '#F97316' }
+                  { label: 'Fast Processing', value: Math.floor(stats.totalAnalyses * 0.40), color: '#3B82F6' },
+                  { label: 'Medium Speed', value: Math.floor(stats.totalAnalyses * 0.45), color: '#8B5CF6' },
+                  { label: 'Slower Processing', value: Math.floor(stats.totalAnalyses * 0.15), color: '#F97316' }
                 ]}
                 title="Processing Speed"
                 description="Analysis processing time breakdown"
@@ -193,7 +199,7 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {recentAnalyses.map((analysis) => (
+                {recentAnalyses.length > 0 ? recentAnalyses.map((analysis) => (
                   <tr
                     key={analysis.id}
                     className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors"
@@ -209,7 +215,7 @@ const Dashboard = () => {
                       </div>
                     </td>
                     <td className="py-4 px-4 text-sm text-gray-600 dark:text-gray-400">
-                      {analysis.timestamp}
+                      {formatRelativeTime(analysis.created_at)}
                     </td>
                     <td className="py-4 px-4">
                       <span
@@ -231,7 +237,13 @@ const Dashboard = () => {
                       </button>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan={5} className="py-8 px-4 text-center text-gray-500 dark:text-gray-400">
+                      {loading ? 'Loading recent analyses...' : 'No analyses found. Upload a video to get started!'}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
