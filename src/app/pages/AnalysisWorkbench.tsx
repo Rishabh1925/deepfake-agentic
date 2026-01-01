@@ -7,8 +7,8 @@ import SystemArchitectureCanvas from '../components/SystemArchitectureCanvas';
 import LiquidEther from '../components/LiquidEther';
 import { saveAnalysis, checkDuplicateFile, type VideoAnalysis } from '../../lib/supabase';
 
-// Backend API URL - Use environment variable or relative path for same-domain API
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+// Backend API URL - Always use Vercel serverless API
+const API_URL = '/api';
 
 const AnalysisWorkbench = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
