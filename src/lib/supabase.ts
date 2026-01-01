@@ -1,9 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || ''
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+// Create client only if credentials are available
+export const supabase = supabaseUrl && supabaseAnonKey 
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null
 
 // Database schema types
 export interface VideoAnalysis {
@@ -21,6 +24,7 @@ export interface VideoAnalysis {
 
 // Check if file was previously analyzed
 export async function checkDuplicateFile(filename: string, fileSize: number) {
+  if (!supabase) return null
   try {
     const { data, error } = await supabase
       .from('video_analyses')
@@ -40,6 +44,10 @@ export async function checkDuplicateFile(filename: string, fileSize: number) {
 
 // Analytics functions
 export async function saveAnalysis(analysis: VideoAnalysis) {
+  if (!supabase) {
+    console.warn('Supabase not configured, skipping save')
+    return null
+  }
   try {
     const { data, error } = await supabase
       .from('video_analyses')
@@ -55,6 +63,15 @@ export async function saveAnalysis(analysis: VideoAnalysis) {
 }
 
 export async function getAnalyticsStats() {
+  if (!supabase) {
+    return {
+      totalAnalyses: 0,
+      fakeDetected: 0,
+      realDetected: 0,
+      recentAnalyses: 0,
+      averageConfidence: 0
+    }
+  }
   try {
     // Get total count
     const { count: totalCount, error: countError } = await supabase
@@ -115,6 +132,7 @@ export async function getAnalyticsStats() {
 }
 
 export async function getRecentAnalyses(limit = 10) {
+  if (!supabase) return []
   try {
     const { data, error } = await supabase
       .from('video_analyses')
