@@ -131,20 +131,48 @@ export async function getAnalyticsStats() {
   }
 }
 
-export async function getRecentAnalyses(limit = 10) {
-  if (!supabase) return []
+export async function getRecentAnalyses(limit = 10, offset = 0, filter: 'all' | 'real' | 'fake' = 'all') {
+  if (!supabase) return { data: [], hasMore: false }
+  try {
+    let query = supabase
+      .from('video_analyses')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
+    
+    if (filter !== 'all') {
+      query = query.eq('prediction', filter)
+    }
+    
+    const { data, error, count } = await query
+    
+    if (error) throw error
+    return { 
+      data: data || [], 
+      hasMore: (count || 0) > offset + limit,
+      total: count || 0
+    }
+  } catch (error) {
+    console.error('Error fetching recent analyses:', error)
+    return { data: [], hasMore: false, total: 0 }
+  }
+}
+
+// Get single analysis by ID
+export async function getAnalysisById(id: string) {
+  if (!supabase) return null
   try {
     const { data, error } = await supabase
       .from('video_analyses')
       .select('*')
-      .order('created_at', { ascending: false })
-      .limit(limit)
+      .eq('id', id)
+      .single()
     
     if (error) throw error
-    return data || []
+    return data
   } catch (error) {
-    console.error('Error fetching recent analyses:', error)
-    return []
+    console.error('Error fetching analysis:', error)
+    return null
   }
 }
 

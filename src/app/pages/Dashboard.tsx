@@ -1,8 +1,20 @@
-import { FileVideo, Clock, AlertCircle } from 'lucide-react';
+import { FileVideo, Clock, AlertCircle, X, Filter, ChevronDown, Loader2 } from 'lucide-react';
 import { RechartsDonutChart } from '../components/charts/RechartsDonutChart';
 import MetadataSummary from '../components/charts/MetadataSummary';
 import { getAnalyticsStats, getRecentAnalyses, formatRelativeTime } from '../../lib/supabase';
 import { useState, useEffect } from 'react';
+
+interface AnalysisDetail {
+  id: string;
+  filename: string;
+  file_size: number;
+  prediction: 'real' | 'fake';
+  confidence: number;
+  models_used: string[];
+  processing_time: number;
+  analysis_result: any;
+  created_at: string;
+}
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -12,33 +24,87 @@ const Dashboard = () => {
     recentAnalyses: 0,
     averageConfidence: 0
   });
-  const [recentAnalyses, setRecentAnalyses] = useState<any[]>([]);
+  const [recentAnalyses, setRecentAnalyses] = useState<AnalysisDetail[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [filter, setFilter] = useState<'all' | 'real' | 'fake'>('all');
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  
+  // Modal state
+  const [selectedAnalysis, setSelectedAnalysis] = useState<AnalysisDetail | null>(null);
+  const [showModal, setShowModal] = useState(false);
+
+  const ITEMS_PER_PAGE = 10;
+
+  const fetchData = async (reset = false) => {
+    try {
+      if (reset) {
+        setLoading(true);
+        setOffset(0);
+      }
+      
+      const currentOffset = reset ? 0 : offset;
+      
+      const [analyticsData, recentData] = await Promise.all([
+        getAnalyticsStats(),
+        getRecentAnalyses(ITEMS_PER_PAGE, currentOffset, filter)
+      ]);
+      
+      setStats(analyticsData);
+      
+      if (reset) {
+        setRecentAnalyses(recentData.data);
+      } else {
+        setRecentAnalyses(prev => [...prev, ...recentData.data]);
+      }
+      setHasMore(recentData.hasMore);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [analyticsData, recentData] = await Promise.all([
-          getAnalyticsStats(),
-          getRecentAnalyses(10)
-        ]);
-        
-        setStats(analyticsData);
-        setRecentAnalyses(recentData);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchData(true);
+  }, [filter]);
 
-    fetchData();
-    
-    // Refresh data every 30 seconds
-    const interval = setInterval(fetchData, 30000);
+  useEffect(() => {
+    // Refresh stats every 30 seconds
+    const interval = setInterval(() => {
+      getAnalyticsStats().then(setStats);
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleLoadMore = async () => {
+    setLoadingMore(true);
+    const newOffset = offset + ITEMS_PER_PAGE;
+    setOffset(newOffset);
+    
+    const recentData = await getRecentAnalyses(ITEMS_PER_PAGE, newOffset, filter);
+    setRecentAnalyses(prev => [...prev, ...recentData.data]);
+    setHasMore(recentData.hasMore);
+    setLoadingMore(false);
+  };
+
+  const handleViewAnalysis = (analysis: AnalysisDetail) => {
+    setSelectedAnalysis(analysis);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedAnalysis(null);
+  };
+
+  const handleFilterChange = (newFilter: 'all' | 'real' | 'fake') => {
+    setFilter(newFilter);
+    setShowFilterDropdown(false);
+  };
 
   const displayStats = [
     {
@@ -51,13 +117,13 @@ const Dashboard = () => {
       label: 'Detected Fakes',
       value: loading ? '...' : stats.fakeDetected.toLocaleString(),
       icon: <AlertCircle className="w-5 h-5" />,
-      change: '+8%',
+      change: stats.totalAnalyses > 0 ? `${((stats.fakeDetected / stats.totalAnalyses) * 100).toFixed(0)}%` : '0%',
     },
     {
-      label: 'Avg Processing',
-      value: '3.2s',
+      label: 'Avg Confidence',
+      value: loading ? '...' : `${(stats.averageConfidence * 100).toFixed(1)}%`,
       icon: <Clock className="w-5 h-5" />,
-      change: '-15%',
+      change: 'accuracy',
     },
   ];
 
@@ -101,7 +167,6 @@ const Dashboard = () => {
             Metadata Analysis Dashboard
           </h2>
           
-          {/* Summary Overview */}
           <div className="mb-8 animate-scale-in">
             <MetadataSummary
               data={{
@@ -118,7 +183,6 @@ const Dashboard = () => {
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            {/* Detection Results Distribution */}
             <div className="animate-slide-in-right">
               <RechartsDonutChart
                 data={[
@@ -133,7 +197,6 @@ const Dashboard = () => {
               />
             </div>
 
-            {/* Confidence Level Distribution */}
             <div className="animate-slide-in-right" style={{ animationDelay: '0.1s' }}>
               <RechartsDonutChart
                 data={[
@@ -149,7 +212,6 @@ const Dashboard = () => {
               />
             </div>
 
-            {/* Processing Speed Distribution */}
             <div className="animate-slide-in-right" style={{ animationDelay: '0.2s' }}>
               <RechartsDonutChart
                 data={[
@@ -165,8 +227,6 @@ const Dashboard = () => {
               />
             </div>
           </div>
-
-
         </div>
 
         {/* Analysis History */}
@@ -175,27 +235,52 @@ const Dashboard = () => {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               Recent Analyses
             </h2>
+            
+            {/* Filter Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors text-sm"
+              >
+                <Filter className="w-4 h-4" />
+                <span className="capitalize">{filter === 'all' ? 'All Results' : filter}</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              
+              {showFilterDropdown && (
+                <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-10">
+                  <button
+                    onClick={() => handleFilterChange('all')}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-t-lg ${filter === 'all' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600' : ''}`}
+                  >
+                    All Results
+                  </button>
+                  <button
+                    onClick={() => handleFilterChange('real')}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${filter === 'real' ? 'bg-green-50 dark:bg-green-900/30 text-green-600' : ''}`}
+                  >
+                    Real Only
+                  </button>
+                  <button
+                    onClick={() => handleFilterChange('fake')}
+                    className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 rounded-b-lg ${filter === 'fake' ? 'bg-red-50 dark:bg-red-900/30 text-red-600' : ''}`}
+                  >
+                    Fake Only
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200 dark:border-gray-800">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-400">
-                    Filename
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-400">
-                    Time
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-400">
-                    Result
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-400">
-                    Confidence
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-400">
-                    Actions
-                  </th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-400">Filename</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-400">Time</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-400">Result</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-400">Confidence</th>
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-400">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -209,7 +294,7 @@ const Dashboard = () => {
                         <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
                           <FileVideo className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         </div>
-                        <span className="text-gray-900 dark:text-white text-sm">
+                        <span className="text-gray-900 dark:text-white text-sm truncate max-w-[200px]" title={analysis.filename}>
                           {analysis.filename}
                         </span>
                       </div>
@@ -232,7 +317,10 @@ const Dashboard = () => {
                       {(analysis.confidence * 100).toFixed(1)}%
                     </td>
                     <td className="py-4 px-4">
-                      <button className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
+                      <button 
+                        onClick={() => handleViewAnalysis(analysis)}
+                        className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium"
+                      >
                         View
                       </button>
                     </td>
@@ -247,8 +335,155 @@ const Dashboard = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Load More Button */}
+          {hasMore && (
+            <div className="mt-6 text-center">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors text-sm font-medium flex items-center gap-2 mx-auto"
+              >
+                {loadingMore ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  'Load More'
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Analysis Detail Modal */}
+      {showModal && selectedAnalysis && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={closeModal}>
+          <div 
+            className="bg-white dark:bg-gray-900 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Analysis Details</h3>
+              <button
+                onClick={closeModal}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-6">
+              {/* File Info */}
+              <div className="flex items-center gap-4">
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                  selectedAnalysis.prediction === 'fake'
+                    ? 'bg-red-100 dark:bg-red-900/30'
+                    : 'bg-green-100 dark:bg-green-900/30'
+                }`}>
+                  <FileVideo className={`w-8 h-8 ${
+                    selectedAnalysis.prediction === 'fake'
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-green-600 dark:text-green-400'
+                  }`} />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-gray-900 dark:text-white truncate max-w-[400px]">
+                    {selectedAnalysis.filename}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {(selectedAnalysis.file_size / (1024 * 1024)).toFixed(2)} MB • {new Date(selectedAnalysis.created_at).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+
+              {/* Result Badge */}
+              <div className={`p-4 rounded-xl ${
+                selectedAnalysis.prediction === 'fake'
+                  ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                  : 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Prediction Result</p>
+                    <p className={`text-2xl font-bold capitalize ${
+                      selectedAnalysis.prediction === 'fake'
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-green-600 dark:text-green-400'
+                    }`}>
+                      {selectedAnalysis.prediction === 'fake' ? 'Manipulated (Fake)' : 'Authentic (Real)'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Confidence</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {(selectedAnalysis.confidence * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Processing Time</p>
+                  <p className="text-xl font-semibold text-gray-900 dark:text-white">
+                    {selectedAnalysis.processing_time?.toFixed(2) || '2.00'}s
+                  </p>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Models Used</p>
+                  <p className="text-xl font-semibold text-gray-900 dark:text-white">
+                    {selectedAnalysis.models_used?.length || 1}
+                  </p>
+                </div>
+              </div>
+
+              {/* Models Used */}
+              {selectedAnalysis.models_used && selectedAnalysis.models_used.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Specialist Models</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedAnalysis.models_used.map((model, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm"
+                      >
+                        {model}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Explanation */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Analysis Summary</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {selectedAnalysis.prediction === 'fake'
+                    ? `This video has been classified as MANIPULATED with ${(selectedAnalysis.confidence * 100).toFixed(1)}% confidence. The analysis detected potential manipulation artifacts using ${selectedAnalysis.models_used?.length || 1} specialist model(s).`
+                    : `This video has been classified as AUTHENTIC with ${(selectedAnalysis.confidence * 100).toFixed(1)}% confidence. No significant manipulation artifacts were detected during the analysis.`
+                  }
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-gray-200 dark:border-gray-800">
+              <button
+                onClick={closeModal}
+                className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white rounded-lg transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
