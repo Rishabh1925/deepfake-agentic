@@ -24,7 +24,7 @@
 
 ## Overview
 
-Interceptor is an advanced agentic AI system designed for autonomous deepfake detection and media authenticity verification. The system addresses the critical challenge of detecting manipulated media, verifying authenticity, and strengthening digital trust across platforms and operational environments.
+[Interceptor](https://interceptor-eraksha.vercel.app/) is an advanced agentic AI system designed for autonomous deepfake detection and media authenticity verification. The system addresses the critical challenge of detecting manipulated media, verifying authenticity, and strengthening digital trust across platforms and operational environments.
 
 ### Key Innovations
 
@@ -188,6 +188,7 @@ Optimized for field operations:
 - Python 3.9+
 - Docker (optional)
 - CUDA-compatible GPU (optional, for training)
+- [Model Weights (optional)](https://huggingface.co/Pran-ay-22077/interceptor-models)
 
 ### Quick Start
 
@@ -355,7 +356,7 @@ Check system health status.
 ### Dataset Preparation
 
 The system supports training on various deepfake datasets:
-- DFDC (Deepfake Detection Challenge)
+- [DFDC (Deepfake Detection Challenge)](https://www.kaggle.com/datasets/pranay22077/dfdc-10)
 - FaceForensics++
 - CelebDF
 - DeeperForensics
