@@ -548,7 +548,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions, support, or collaboration opportunities:
 
-- **Project Repository**: [GitHub](https://github.com/your-username/interceptor)
+- **Project Repository**: [GitHub](https://github.com/Pranay22077/deepfake-agentic)
 - **Documentation**: [Technical Docs](INTERCEPTOR_TECHNICAL_DOCUMENTATION.md)
 - **Issues**: [GitHub Issues](https://github.com/your-username/interceptor/issues)
 
